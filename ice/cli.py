@@ -16,6 +16,7 @@ import settings
 from logs import logger
 from filesystem import RealFilesystem
 from tasks import  TaskEngine, LaunchSteamTask, LogAppStateTask, SyncShortcutsTask, UpdateGridImagesTask
+from gui import GraphicalRunner
 
 class CommandLineRunner(object):
 
@@ -34,6 +35,7 @@ class CommandLineRunner(object):
     parser.add_argument('-e', '--emulators', type=str, default=None)
     # Debugging options
     parser.add_argument('-d', '--dry-run', action='store_true')
+    parser.add_argument('-g', '--gui', action='store_true', help="Launches app with experimental gui")
     return parser.parse_args(argv)
 
   def should_use_user_override(self, override):
@@ -81,13 +83,22 @@ class CommandLineRunner(object):
         'consoles.txt': options.consoles,
         'emulators.txt': options.emulators,
     })
-    engine = TaskEngine(
-      self.get_steam(app_settings.config),
-      filesystem = self.filesystem,
-      app_settings = app_settings,
-    )
-    engine.run(
-      tasks = self.tasks_for_options(app_settings, options),
-      skip_steam_check=options.skip_steam_check,
-      dry_run=options.dry_run
-    )
+    if options.gui:
+      gui = GraphicalRunner(
+        self.get_steam(app_settings.config),
+        self.filesystem,
+        app_settings,
+        options
+      )
+      gui.run()
+    else:
+      engine = TaskEngine(
+        self.get_steam(app_settings.config),
+        filesystem = self.filesystem,
+        app_settings = app_settings,
+      )
+      engine.run(
+        tasks = self.tasks_for_options(app_settings, options),
+        skip_steam_check=options.skip_steam_check,
+        dry_run=options.dry_run
+      )
