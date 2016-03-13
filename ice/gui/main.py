@@ -10,6 +10,8 @@ from ice.parsing.rom_parser import ROMParser
 from ice.rom_finder import ROMFinder
 from ice.error.env_checker_error import EnvCheckerError
 from ice.environment_checker import EnvironmentChecker
+from ice.gui.emulators import EmulatoreGui
+from ice.gui.consoles import ConsoleGui
 from ice import consoles
 from ice import paths
 
@@ -92,19 +94,19 @@ class GraphicalRunner(QtGui.QMainWindow):
   def __init__gui(self):
     #setup window
     self.setGeometry(200,200,800, 600)
-    self.resizeEvent = self.onResize
+    self.resizeEvent = self.on_resize
 
-    #Setup Statusbar
+    #Setup StatusBar
     self.statusBar = QtGui.QStatusBar()#self.statusBar().showMessage()
     self.setStatusBar(self.statusBar)
     self.statusBar.showMessage(str.format("{0} roms found", len(self.__roms)))
-    self.statusBar.resizeEvent = self.onResize
+    self.statusBar.resizeEvent = self.on_resize
 
     #Setup Toolbar
     self.toolBar = QtGui.QToolBar(self)
     self.addToolBar(self.toolBar)
     self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    self.toolBar.resizeEvent = self.onResize
+    self.toolBar.resizeEvent = self.on_resize
 
     emulatorAction = QtGui.QAction(self)
     emulatorAction.setIcon(QtGui.QIcon("../icon.ico"))
@@ -146,20 +148,28 @@ class GraphicalRunner(QtGui.QMainWindow):
     self.romTable = RomTableWidget(self.__roms)
     layout.addWidget(self.romTable)
 
-  def on_emulators_pressed(self):
-    pass
+    #setup dialogs
+    self.emulators = EmulatoreGui(self)
+    self.consoles = ConsoleGui(self)
 
+  @QtCore.pyqtSlot()
+  def on_emulators_pressed(self):
+    self.emulators.exec_()
+
+  @QtCore.pyqtSlot()
   def on_consoles_pressed(self):
-    pass
+    self.consoles.exec_()
 
   def on_run_pressed(self):
     pass
 
-  def onResize(self, event):
+  def on_resize(self, event):
     print event
     tbHeight = self.toolBar.height()
     sbHeight = self.statusBar.height()
-   self.centralWidget.setGeometry(0, tbHeight , self.width(), self.height() - sbHeight - tbHeight)
+    # This line may seem strange but basically we need need to move the central Widget down the height of the
+    # ToolBar and we want it to be the height of the window less the heights of the ToolBar and StatusBar
+    self.centralWidget.setGeometry(0, tbHeight , self.width(), self.height() - sbHeight - tbHeight)
 
   def delete_event(self, widget, event, data=None):
     print "delete event occurred"

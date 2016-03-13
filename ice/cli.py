@@ -16,7 +16,8 @@ import settings
 from logs import logger
 from filesystem import RealFilesystem
 from tasks import  TaskEngine, LaunchSteamTask, LogAppStateTask, SyncShortcutsTask, UpdateGridImagesTask
-from gui import GraphicalRunner
+
+from ice.gui.main import GraphicalRunner
 
 class CommandLineRunner(object):
 
