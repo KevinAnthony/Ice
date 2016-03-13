@@ -16,17 +16,19 @@ from ice import paths
 from pysteam import paths as steam_paths
 from pysteam import steam as steam_module
 
-import pygtk
-pygtk.require('2.0')
-import gtk
+import sys
+from PyQt4 import Qt, QtGui, QtCore
+
 
 STEAM_CHECK_SKIPPED_WARNING = """\
 Not checking whether Steam is running. Any changes made may be overwritten \
 when Steam exits.\
 """
 
-class GraphicalRunner(object):
-  def __init__(self,steam, filesystem, app_settings,options):
+class GraphicalRunner(QtGui.QMainWindow):
+  def __init__(self, steam, filesystem, app_settings,options):
+    self.app = Qt.QApplication(sys.argv)
+    QtGui.QMainWindow.__init__(self)
     self.steam = steam
     self.filesystem = filesystem
 
@@ -40,6 +42,7 @@ class GraphicalRunner(object):
     parser = ROMParser()
     self.rom_finder = ROMFinder(app_settings.config, filesystem, parser)
     self.options = options
+
 
   def validate_environment(self, skip_steam_check):
     """
@@ -81,25 +84,82 @@ class GraphicalRunner(object):
       logger.info("\nPlease resolve these issues and try running Ice again")
       return
 
-    roms = self.rom_finder.roms_for_consoles(self.app_settings.consoles)
+    self.__roms = self.rom_finder.roms_for_consoles(self.app_settings.consoles)
     self.__init__gui()
-    gtk.main()
+    self.show()
+    sys.exit(self.app.exec_())
 
   def __init__gui(self):
-    self.window = gtk.Window()
-    self.window.connect("delete_event", self.delete_event)
-    self.window.connect("destroy", self.destroy)
-    #self.window.set_border_width(10)
-    self.window.set_default_size(800,600)
-    #self.window.set_resizable(True)
-    vbox = gtk.VBox(True,0)
-    label = gtk.Label("Hello, ICE!")
-    vbox.pack_start(label)
-    button = gtk.Button("The Pudding Factory is on fire!")
-    vbox.pack_start(button)
-    self.window.add(vbox)
-    self.window.show_all()
+    #setup window
+    self.setGeometry(200,200,800, 600)
+    self.resizeEvent = self.onResize
 
+    #Setup Statusbar
+    self.statusBar = QtGui.QStatusBar()#self.statusBar().showMessage()
+    self.setStatusBar(self.statusBar)
+    self.statusBar.showMessage(str.format("{0} roms found", len(self.__roms)))
+    self.statusBar.resizeEvent = self.onResize
+
+    #Setup Toolbar
+    self.toolBar = QtGui.QToolBar(self)
+    self.addToolBar(self.toolBar)
+    self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    self.toolBar.resizeEvent = self.onResize
+
+    emulatorAction = QtGui.QAction(self)
+    emulatorAction.setIcon(QtGui.QIcon("../icon.ico"))
+    emulatorAction.setIconText("Emulators")
+    emulatorAction.setShortcut('Ctrl+E')
+    emulatorAction.triggered.connect(self.on_emulators_pressed)
+    self.toolBar.addAction(emulatorAction)
+
+    consoleAction = QtGui.QAction(self)
+    consoleAction.setIcon(QtGui.QIcon("../icon.ico"))
+    consoleAction.setIconText("Console")
+    consoleAction.setShortcut('Ctrl+S')
+    consoleAction.triggered.connect(self.on_consoles_pressed)
+    self.toolBar.addAction(consoleAction)
+
+    self.toolBar.addSeparator()
+
+    runAction = QtGui.QAction(self)
+    runAction.setIcon(QtGui.QIcon("../icon.ico"))
+    runAction.setIconText("Update Steam")
+    runAction.setShortcut('Ctrl+R')
+    runAction.triggered.connect(self.on_run_pressed)
+    self.toolBar.addAction(runAction)
+
+    #Setup Main Widget
+    self.centralWidget = QtGui.QWidget(self)
+    self.centralWidget.setMaximumWidth(16777215)
+    self.centralWidget.setMaximumHeight(16777215)
+    self.centralWidget.setContentsMargins(0,0,0,0)
+    self.centralWidget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred))
+    self.centralWidget.setGeometry(0,0 ,self.width(),self.height())
+
+    #setup layout
+    layout = QtGui.QVBoxLayout(self.centralWidget)
+    layout.setContentsMargins(0, 0, 0, 0)
+    layout.setSpacing(0)
+
+    #setup table
+    self.romTable = RomTableWidget(self.__roms)
+    layout.addWidget(self.romTable)
+
+  def on_emulators_pressed(self):
+    pass
+
+  def on_consoles_pressed(self):
+    pass
+
+  def on_run_pressed(self):
+    pass
+
+  def onResize(self, event):
+    print event
+    tbHeight = self.toolBar.height()
+    sbHeight = self.statusBar.height()
+   self.centralWidget.setGeometry(0, tbHeight , self.width(), self.height() - sbHeight - tbHeight)
 
   def delete_event(self, widget, event, data=None):
     print "delete event occurred"
@@ -107,5 +167,41 @@ class GraphicalRunner(object):
 
   def destroy(self, widget, data=None):
       print "destroy signal occurred"
-      gtk.main_quit()
+     # gtk.main_quit()
       exit(0)
+
+class RomTableWidget(QtGui.QTableWidget):
+    def __init__(self, roms, *args):
+      QtGui.QTableWidget.__init__(self, *args)
+      self.__roms = roms
+      self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+
+      self.insertColumn(0)
+      self.insertColumn(1)
+      self.insertColumn(2)
+      self.setmydata()
+      self.setHorizontalHeaderLabels(['Name', 'Console','Path',])
+      self.resizeColumnsToContents()
+      self.resizeRowsToContents()
+      self.setSortingEnabled(True)
+
+
+
+    def updateFromDict(self, aDict):
+        self.data.clear()
+        self.data.update(aDict)
+
+        self.setmydata()
+
+    def setmydata(self):
+      for n, rom in enumerate(self.__roms):
+        name = rom.name
+        console = rom.console.shortname
+        path = rom.path
+        nameItem = QtGui.QTableWidgetItem(name)
+        consoleItem = QtGui.QTableWidgetItem(console)
+        pathItem = QtGui.QTableWidgetItem(path)
+        self.insertRow(n)
+        self.setItem(n, 0, nameItem)
+        self.setItem(n, 1, consoleItem)
+        self.setItem(n, 2, pathItem)
