@@ -39,8 +39,8 @@ class ConsoleBackedObjectAdapter(object):
   def verify(self, console):
     if console.emulator is None:
       logger.debug("No emulator provided for console `%s`" % console.fullname)
-      return False
-
+      #return False
+      #We don't want to return false here anymore, because we want non-setup emulators to work still
     return True
 
   def save_in_store(self, backing_store, identifier, console):

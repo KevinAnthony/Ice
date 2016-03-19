@@ -7,8 +7,9 @@ Copyright (c) 2016 Kevin Anthony. All rights reserved.
 from PyQt4 import Qt, QtGui, QtCore
 
 class EmulatoreGui(QtGui.QDialog):
-  def __init__(self, parent = None):
+  def __init__(self, parent = None, settings = None):
     super(EmulatoreGui, self).__init__(parent)
+    self.app_settings = settings
     self.buttonBox = QtGui.QDialogButtonBox(self)
     self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
     self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)

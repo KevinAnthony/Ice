@@ -27,6 +27,7 @@ Not checking whether Steam is running. Any changes made may be overwritten \
 when Steam exits.\
 """
 
+
 class GraphicalRunner(QtGui.QMainWindow):
   def __init__(self, steam, filesystem, app_settings,options):
     self.app = Qt.QApplication(sys.argv)
@@ -44,7 +45,6 @@ class GraphicalRunner(QtGui.QMainWindow):
     parser = ROMParser()
     self.rom_finder = ROMFinder(app_settings.config, filesystem, parser)
     self.options = options
-
 
   def validate_environment(self, skip_steam_check):
     """
@@ -149,8 +149,8 @@ class GraphicalRunner(QtGui.QMainWindow):
     layout.addWidget(self.romTable)
 
     #setup dialogs
-    self.emulators = EmulatoreGui(self)
-    self.consoles = ConsoleGui(self)
+    self.emulators = EmulatoreGui(self, self.app_settings)
+    self.consoles = ConsoleGui(self, self.app_settings)
 
   @QtCore.pyqtSlot()
   def on_emulators_pressed(self):
