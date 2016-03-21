@@ -95,7 +95,6 @@ class GraphicalRunner(QtWidgets.QMainWindow):
     #setup window
     self.setGeometry(200,200,800, 600)
     self.resizeEvent = self.on_resize
-    print "here"
     #Setup StatusBar
     self.statusBar = QtWidgets.QStatusBar()#self.statusBar().showMessage()
     self.setStatusBar(self.statusBar)
