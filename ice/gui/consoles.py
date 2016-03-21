@@ -5,12 +5,12 @@ Created by Scott on 2016-03-08.
 Copyright (c) 2016 Kevin Anthony. All rights reserved.
 """
 
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from copy import copy
 
 
-class ConsoleGui(QtGui.QDialog):
+class ConsoleGui(QtWidgets.QDialog):
     def __init__(self, parent=None, settings=None):
         super(ConsoleGui, self).__init__(parent)
 
@@ -18,23 +18,23 @@ class ConsoleGui(QtGui.QDialog):
 
         self.app_settings = settings
         self.setFixedSize(800, 600)
-        self.buttonBox = QtGui.QDialogButtonBox(self)
+        self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel | QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.accepted.connect(self.on_ok)
         self.buttonBox.rejected.connect(self.on_cancel)
 
-        main = QtGui.QWidget(self)
-        self.workspace = QtGui.QWidget(self)
-        self.workspace.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding))
+        main = QtWidgets.QWidget(self)
+        self.workspace = QtWidgets.QWidget(self)
+        self.workspace.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
 
-        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.addWidget(main)
         self.verticalLayout.addWidget(self.buttonBox)
 
-        horizontal_layout = QtGui.QHBoxLayout(main)
+        horizontal_layout = QtWidgets.QHBoxLayout(main)
 
-        toolbar = QtGui.QToolBar()
+        toolbar = QtWidgets.QToolBar()
         toolbar.setIconSize(QtCore.QSize(50, 50))
         toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         toolbar.setMovable(False)
@@ -57,19 +57,19 @@ class ConsoleGui(QtGui.QDialog):
         #self.create_console("Sega Genesis", toolbar, self.on_genesis)
         #self.create_console("Sega Dreamcast", toolbar, self.on_dreamcast)
 
-        self.emulator_label = QtGui.QLabel("", self.workspace)
+        self.emulator_label = QtWidgets.QLabel("", self.workspace)
         self.emulator_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignHCenter)
         old_font = self.emulator_label.font()
         new_font = QtGui.QFont(old_font.family(), 24)
         self.emulator_label.setFont(new_font)
         self.emulator_label.setContentsMargins(0, 0, 0, 0)
-        self.emulator_label.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
+        self.emulator_label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
 
-        line = QtGui.QFrame(self.workspace)
-        line.setFrameShape(QtGui.QFrame.HLine)
-        line.setFrameShadow(QtGui.QFrame.Sunken)
+        line = QtWidgets.QFrame(self.workspace)
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
 
-        scroll = QtGui.QScrollArea()
+        scroll = QtWidgets.QScrollArea()
         scroll.setWidget(toolbar)
         scroll.setStyleSheet("QScrollArea {background: #fff;}")
         scroll.setAlignment(QtCore.Qt.AlignCenter)
@@ -92,11 +92,11 @@ class ConsoleGui(QtGui.QDialog):
             return
         icon = QtGui.QIcon(console.icon)
         if icon is None or icon.isNull():
-            icon = QtGui.QIcon("../icon.ico")
+            icon = QtWidgets.QIcon("../icon.ico")
         self.create_action(icon, console.shortname, toolbar, lambda: self.on_edit_console(console) )
 
     def create_action(self, icon, text, parent, click):
-        action = QtGui.QAction(self)
+        action = QtWidgets.QAction(self)
         action.setIcon(icon)
         action.setText(text)
         parent.addAction(action)

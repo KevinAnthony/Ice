@@ -19,7 +19,7 @@ from pysteam import paths as steam_paths
 from pysteam import steam as steam_module
 
 import sys
-from PyQt4 import Qt, QtGui, QtCore
+from PyQt5 import Qt, QtGui, QtWidgets, QtCore
 
 
 STEAM_CHECK_SKIPPED_WARNING = """\
@@ -28,10 +28,10 @@ when Steam exits.\
 """
 
 
-class GraphicalRunner(QtGui.QMainWindow):
+class GraphicalRunner(QtWidgets.QMainWindow):
   def __init__(self, steam, filesystem, app_settings,options):
     self.app = Qt.QApplication(sys.argv)
-    QtGui.QMainWindow.__init__(self)
+    QtWidgets.QMainWindow.__init__(self)
     self.steam = steam
     self.filesystem = filesystem
 
@@ -95,27 +95,26 @@ class GraphicalRunner(QtGui.QMainWindow):
     #setup window
     self.setGeometry(200,200,800, 600)
     self.resizeEvent = self.on_resize
-
     #Setup StatusBar
-    self.statusBar = QtGui.QStatusBar()#self.statusBar().showMessage()
+    self.statusBar = QtWidgets.QStatusBar()#self.statusBar().showMessage()
     self.setStatusBar(self.statusBar)
     self.statusBar.showMessage(str.format("{0} roms found", len(self.__roms)))
     self.statusBar.resizeEvent = self.on_resize
 
     #Setup Toolbar
-    self.toolBar = QtGui.QToolBar(self)
+    self.toolBar = QtWidgets.QToolBar(self)
     self.addToolBar(self.toolBar)
     self.toolBar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     self.toolBar.resizeEvent = self.on_resize
 
-    emulatorAction = QtGui.QAction(self)
+    emulatorAction = QtWidgets.QAction(self)
     emulatorAction.setIcon(QtGui.QIcon("../icon.ico"))
     emulatorAction.setIconText("Emulators")
     emulatorAction.setShortcut('Ctrl+E')
     emulatorAction.triggered.connect(self.on_emulators_pressed)
     self.toolBar.addAction(emulatorAction)
 
-    consoleAction = QtGui.QAction(self)
+    consoleAction = QtWidgets.QAction(self)
     consoleAction.setIcon(QtGui.QIcon("../icon.ico"))
     consoleAction.setIconText("Console")
     consoleAction.setShortcut('Ctrl+S')
@@ -124,7 +123,7 @@ class GraphicalRunner(QtGui.QMainWindow):
 
     self.toolBar.addSeparator()
 
-    runAction = QtGui.QAction(self)
+    runAction = QtWidgets.QAction(self)
     runAction.setIcon(QtGui.QIcon("../icon.ico"))
     runAction.setIconText("Update Steam")
     runAction.setShortcut('Ctrl+R')
@@ -132,15 +131,15 @@ class GraphicalRunner(QtGui.QMainWindow):
     self.toolBar.addAction(runAction)
 
     #Setup Main Widget
-    self.centralWidget = QtGui.QWidget(self)
+    self.centralWidget = QtWidgets.QWidget(self)
     self.centralWidget.setMaximumWidth(16777215)
     self.centralWidget.setMaximumHeight(16777215)
     self.centralWidget.setContentsMargins(0,0,0,0)
-    self.centralWidget.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred))
+    self.centralWidget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred))
     self.centralWidget.setGeometry(0,0 ,self.width(),self.height())
 
     #setup layout
-    layout = QtGui.QVBoxLayout(self.centralWidget)
+    layout = QtWidgets.QVBoxLayout(self.centralWidget)
     layout.setContentsMargins(0, 0, 0, 0)
     layout.setSpacing(0)
 
@@ -180,11 +179,11 @@ class GraphicalRunner(QtGui.QMainWindow):
      # gtk.main_quit()
       exit(0)
 
-class RomTableWidget(QtGui.QTableWidget):
+class RomTableWidget(QtWidgets.QTableWidget):
     def __init__(self, roms, *args):
-      QtGui.QTableWidget.__init__(self, *args)
+      QtWidgets.QTableWidget.__init__(self, *args)
       self.__roms = roms
-      self.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+      self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
 
       self.insertColumn(0)
       self.insertColumn(1)
@@ -208,10 +207,11 @@ class RomTableWidget(QtGui.QTableWidget):
         name = rom.name
         console = rom.console.shortname
         path = rom.path
-        nameItem = QtGui.QTableWidgetItem(name)
-        consoleItem = QtGui.QTableWidgetItem(console)
-        pathItem = QtGui.QTableWidgetItem(path)
+        nameItem = QtWidgets.QTableWidgetItem(name)
+        consoleItem = QtWidgets.QTableWidgetItem(console)
+        pathItem = QtWidgets.QTableWidgetItem(path)
         self.insertRow(n)
         self.setItem(n, 0, nameItem)
         self.setItem(n, 1, consoleItem)
         self.setItem(n, 2, pathItem)
+# vim: tabstop=8 expandtab shiftwidth=4 softtabstop=4
