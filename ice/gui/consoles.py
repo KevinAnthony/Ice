@@ -15,6 +15,7 @@ class ConsoleGui(QtWidgets.QDialog):
         super(ConsoleGui, self).__init__(parent)
 
         self.consoles = copy(settings.consoles)
+        self.emulators = copy(settings.emulators)
 
         self.app_settings = settings
         self.setFixedSize(800, 600)
@@ -25,8 +26,9 @@ class ConsoleGui(QtWidgets.QDialog):
         self.buttonBox.rejected.connect(self.on_cancel)
 
         main = QtWidgets.QWidget(self)
-        self.workspace = QtWidgets.QWidget(self)
-        self.workspace.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
+        self.workspace_widget = QtWidgets.QWidget(self)
+        self.workspace_widget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding))
+        self.workspace = QtWidgets.QVBoxLayout(self.workspace_widget)
 
         self.verticalLayout = QtWidgets.QVBoxLayout(self)
         self.verticalLayout.addWidget(main)
@@ -42,32 +44,50 @@ class ConsoleGui(QtWidgets.QDialog):
         toolbar.setOrientation(QtCore.Qt.Vertical)
         toolbar.setStyleSheet("QToolBar { border: 0px; background: #fff;}")
 
+        first_console = None
         for console in self.consoles:
+            if first_console is None:
+                first_console = console
             self.create_console(console, toolbar)
-        #self.create_console("Nintendo Entertainment System", toolbar, self.on_nes)
-        #self.create_console("Super Nintendo", toolbar, self.on_snes)
-        #self.create_console("Nintendo 64", toolbar, self.on_n64)
-        #self.create_console("Nintendo Gamecube", toolbar, self.on_gc)
-        #self.create_console("Nintendo Wii", toolbar, self.on_wii)
-        #self.create_console("Nintendo Gameboy", toolbar, self.on_gb)
-        #self.create_console("Gameboy Advance", toolbar, self.on_gba)
-        #self.create_console("Nintendo DS", toolbar, self.on_ds)
-        #self.create_console("Playstation 1", toolbar, self.on_ps1)
-        #self.create_console("Playstation 2", toolbar, self.on_ps2)
-        #self.create_console("Sega Genesis", toolbar, self.on_genesis)
-        #self.create_console("Sega Dreamcast", toolbar, self.on_dreamcast)
 
-        self.emulator_label = QtWidgets.QLabel("", self.workspace)
-        self.emulator_label.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignHCenter)
+        #Set all Workspace widgets up here
+        self.emulator_label = QtWidgets.QLabel("")
+        self.emulator_label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         old_font = self.emulator_label.font()
-        new_font = QtGui.QFont(old_font.family(), 24)
-        self.emulator_label.setFont(new_font)
+        font = old_font.family()
+        self.emulator_label.setFont(QtGui.QFont(font, 24))
         self.emulator_label.setContentsMargins(0, 0, 0, 0)
-        self.emulator_label.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        self.emulator_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.workspace.addWidget(self.emulator_label)
 
-        line = QtWidgets.QFrame(self.workspace)
+        line = QtWidgets.QFrame()
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.workspace.addWidget(line)
+
+        self.shortname = QtWidgets.QLineEdit()
+        self.create_config_line("Nickname", self.shortname)
+
+        self.extensions = QtWidgets.QLineEdit()
+        self.create_config_line("Extensions", self.extensions)
+
+        self.custom_roms_directory = QtWidgets.QLineEdit()
+        self.create_config_line("Custom Rom Directory", self.custom_roms_directory)
+
+        self.prefix = QtWidgets.QLineEdit()
+        self.create_config_line("Prefix", self.prefix)
+
+        self.icon = QtWidgets.QLineEdit()
+        self.create_config_line("Icon", self.icon)
+
+        self.images_directory = QtWidgets.QLineEdit()
+        self.create_config_line("Extensions", self.images_directory)
+
+        self.emulator_combobox = QtWidgets.QComboBox()
+        self.create_config_line("Default Emulator", self.emulator_combobox)
+
+        # END **Set all Workspace widgets up here**
+        self.workspace.setAlignment(QtCore.Qt.AlignTop )
 
         scroll = QtWidgets.QScrollArea()
         scroll.setWidget(toolbar)
@@ -75,7 +95,9 @@ class ConsoleGui(QtWidgets.QDialog):
         scroll.setAlignment(QtCore.Qt.AlignCenter)
         scroll.setMaximumWidth(175)
         horizontal_layout.addWidget(scroll)
-        horizontal_layout.addWidget(self.workspace)
+        horizontal_layout.addWidget(self.workspace_widget)
+
+        self.on_edit_console(first_console)
 
     def on_ok(self):
         # TODO write to app_settings
@@ -87,13 +109,28 @@ class ConsoleGui(QtWidgets.QDialog):
         self.close()
 
     def create_console(self, console, toolbar):
-        #console = self.find_console(name)
         if console is None:
             return
         icon = QtGui.QIcon(console.icon)
         if icon is None or icon.isNull():
             icon = QtWidgets.QIcon("../icon.ico")
         self.create_action(icon, console.shortname, toolbar, lambda: self.on_edit_console(console) )
+
+    def create_config_line(self, label_text, settings_widget):
+        widget = QtWidgets.QWidget()
+        self.workspace.addWidget(widget)
+
+        hbox = QtWidgets.QHBoxLayout(widget)
+
+        label = QtWidgets.QLabel(label_text)
+        label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        hbox.addWidget(label)
+
+        if not type(settings_widget) is QtWidgets.QComboBox:
+            settings_widget.setAlignment(QtCore.Qt.AlignTop)
+        settings_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        hbox.addWidget(settings_widget)
 
     def create_action(self, icon, text, parent, click):
         action = QtWidgets.QAction(self)
@@ -109,6 +146,22 @@ class ConsoleGui(QtWidgets.QDialog):
         return None
 
     def on_edit_console(self, console):
+        if console is None:
+            return
         icon = console.icon
         self.emulator_label.setText(console.fullname)
-        self.emulator_label.setMinimumWidth(self.workspace.width())
+        self.shortname.setText(console.shortname)
+        self.extensions.setText(console.extensions)
+        self.custom_roms_directory.setText(console.custom_roms_directory)
+        self.prefix.setText(console.prefix)
+        self.icon.setText(console.icon)
+        self.images_directory.setText(console.images_directory)
+        self.emulator_combobox.clear()
+        for emulator in self.emulators:
+            self.emulator_combobox.addItem(emulator.name)
+        index = self.emulator_combobox.findText(console.emulator.name, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.emulator_combobox.setCurrentIndex(index)
+
+
+
