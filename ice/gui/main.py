@@ -163,7 +163,6 @@ class GraphicalRunner(QtWidgets.QMainWindow):
     pass
 
   def on_resize(self, event):
-    print event
     tbHeight = self.toolBar.height()
     sbHeight = self.statusBar.height()
     # This line may seem strange but basically we need need to move the central Widget down the height of the
