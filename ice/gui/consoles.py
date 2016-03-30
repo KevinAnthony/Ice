@@ -134,7 +134,7 @@ class ConsoleGui(QtWidgets.QDialog):
         hbox.addWidget(settings_widget)
         
     def saveConsoleSettings(self):
-        temp_file = "../consoles2.txt"
+        temp_file = "../consoles.txt"
         f = open(temp_file, "w")
         
         for console in self.consoles:
