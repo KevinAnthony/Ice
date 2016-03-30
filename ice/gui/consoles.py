@@ -98,7 +98,6 @@ class ConsoleGui(QtWidgets.QDialog):
         horizontal_layout.addWidget(self.workspace_widget)
 
         self.on_edit_console(first_console)
-	self.accepted.connect(self.saveConsoleSettings)
 
     def on_ok(self):
         # TODO write to app_settings
@@ -139,26 +138,49 @@ class ConsoleGui(QtWidgets.QDialog):
         f = open(temp_file, "w")
         
         for console in self.consoles:
-            f.write("[" + console.fullname + "]\n")
             
-            for attribute in dir(console):
+            if console.fullname != self.emulator_label.text():
+                f.write("[" + console.fullname + "]\n")
                 
-                if attribute == "emulator" and console.emulator is not None:
-                    f.write("emulator=" + console.emulator.name + "\n")
-                elif not attribute.startswith('__') and not attribute.startswith('_') and attribute != "count" and attribute != "index" and attribute != "fullname":
-                    attribute_value = str(getattr(console,attribute))
+                for attribute in dir(console):
                     
-                    if attribute_value != "" :
-                        file_attribute = attribute
+                    if attribute == "emulator" and console.emulator is not None:
+                        f.write("emulator=" + console.emulator.name + "\n")
+                    elif not attribute.startswith('__') and not attribute.startswith('_') and attribute != "count" and attribute != "index" and attribute != "fullname":
+
+                        attribute_value = str(getattr(console,attribute))
                         
-                        if attribute == "shortname":
-                            file_attribute = "nickname"
-                        elif attribute == "custom_roms_directory":
-                            file_attribute = "rom directory"
-                        elif attribute == "images_directory":
-                            file_attribute = "images directory"
+                        if attribute_value != "" :
+
+                            if attribute == "prefix":
+                                attribute_value = "[" + attribute_value + "]"
+
+                            file_attribute = attribute
                             
-                        f.write(file_attribute + "=" + attribute_value + "\n")
+                            if attribute == "shortname":
+                                file_attribute = "nickname"
+                            elif attribute == "custom_roms_directory":
+                                file_attribute = "rom directory"
+                            elif attribute == "images_directory":
+                                file_attribute = "images directory"
+
+                            f.write(file_attribute + "=" + attribute_value + "\n")
+            else:
+                f.write("[" + self.emulator_label.text() + "]\n")
+                if self.shortname.text() != "":
+                    f.write("nickname=" + self.shortname.text() + "\n")
+                if str(self.emulator_combobox.currentText()) != "":
+                    f.write("emulator=" + str(self.emulator_combobox.currentText()) + "\n")
+                if self.extensions.text() != "":
+                    f.write("extensions=" + self.extensions.text() + "\n")
+                if self.custom_roms_directory.text() != "":
+                    f.write("roms directory=" + self.custom_roms_directory.text() + "\n")
+                if self.prefix.text() != "":
+                    f.write("prefix=" + self.prefix.text() + "\n")
+                if self.icon != "":
+                    f.write("icon=" + self.icon.text() + "\n")
+                if self.images_directory.text() != "":
+                    f.write("images directory=" + self.images_directory.text() + "\n")
             f.write("\n")
         f.close()
 
