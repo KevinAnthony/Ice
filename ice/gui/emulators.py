@@ -4,19 +4,42 @@ emulators.py
 Created by Scott on 2016-03-08.
 Copyright (c) 2016 Kevin Anthony. All rights reserved.
 """
-from PyQt5 import Qt, QtWidgets, QtCore
 
-class EmulatoreGui(QtWidgets.QDialog):
-  def __init__(self, parent = None, settings = None):
-    super(EmulatoreGui, self).__init__(parent)
-    self.app_settings = settings
-    self.buttonBox = QtWidgets.QDialogButtonBox(self)
-    self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-    self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+from copy import copy
 
-    self.textBrowser = QtWidgets.QTextBrowser(self)
-    self.textBrowser.append("This is a QTextBrowser!")
+from ice.gui import config
 
-    self.verticalLayout = QtWidgets.QVBoxLayout(self)
-    self.verticalLayout.addWidget(self.textBrowser)
-    self.verticalLayout.addWidget(self.buttonBox)
+from PyQt5 import QtGui, QtWidgets, QtCore
+
+class EmulatoreGui(config.Config):
+
+    def __init__(self, parent = None, settings = None):
+        super(EmulatoreGui, self).__init__(parent)
+        self.app_settings = settings
+
+        self.consoles = copy(settings.consoles)
+        self.emulators = copy(settings.emulators)
+
+        self.app_settings = settings
+
+        first_emulator = None
+        for emulator in self.emulators:
+            if first_emulator is None:
+                first_emulator = emulator
+            action = self.create_emulator(emulator)
+            self.toolbar.addAction(action)
+            self.toolbar.adjustSize()
+
+        self.emulator_label = QtWidgets.QLabel("")
+        self.emulator_label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        old_font = self.emulator_label.font()
+        font = old_font.family()
+        self.emulator_label.setFont(QtGui.QFont(font, 24))
+        self.emulator_label.setContentsMargins(0, 0, 0, 0)
+        self.emulator_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.workspace.addWidget(self.emulator_label)
+
+        line = QtWidgets.QFrame()
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.workspace.addWidget(line)

@@ -30,14 +30,14 @@ class ConsoleGui(config.Config):
         self.toolbar.adjustSize()
 
         #Set all Workspace widgets up here
-        self.emulator_label = QtWidgets.QLabel("")
-        self.emulator_label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
-        old_font = self.emulator_label.font()
+        self.console_label = QtWidgets.QLabel("")
+        self.console_label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        old_font = self.console_label.font()
         font = old_font.family()
-        self.emulator_label.setFont(QtGui.QFont(font, 24))
-        self.emulator_label.setContentsMargins(0, 0, 0, 0)
-        self.emulator_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-        self.workspace.addWidget(self.emulator_label)
+        self.console_label.setFont(QtGui.QFont(font, 24))
+        self.console_label.setContentsMargins(0, 0, 0, 0)
+        self.console_label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.workspace.addWidget(self.console_label)
 
         line = QtWidgets.QFrame()
         line.setFrameShape(QtWidgets.QFrame.HLine)
