@@ -1,4 +1,11 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
+import os, platform
+if os.name == "nt":
+    import win32ui
+    import win32gui
+    import win32api
+    import win32con
+    from PyQt5.QtWinExtras import QtWin
 
 
 class Config(QtWidgets.QDialog):
@@ -85,3 +92,38 @@ class Config(QtWidgets.QDialog):
 
     def on_remove(self):
         pass
+
+    def icon_from_exec(self, path):
+        if (os.name == "nt"):
+            return self.icon_from_exec_win(path)
+        if (os.name == "posix"):
+            if (platform.system() == "Darwin"):
+                return self.icon_from_exec_mac(path)
+            if (platform.system() == "Linux"):
+                return self.icon_from_exec_nix(path)
+        return None
+
+    def icon_from_exec_mac(self, path):
+        return None
+
+    def icon_from_exec_nix(self, path):
+        return None
+
+    def icon_from_exec_win(self, path):
+        large, small = win32gui.ExtractIconEx(path, 0)
+        for i in small:
+            win32gui.DestroyIcon(i)
+        pixmap = QtWin.fromHBITMAP(self.bitmapFromHIcon(large[0]),1)
+        for i in large:
+            win32gui.DestroyIcon(i)
+        return QtGui.QIcon(pixmap)
+
+    def bitmapFromHIcon(self, hIcon):
+        hdc = win32ui.CreateDCFromHandle(win32gui.GetDC(0))
+        hbmp = win32ui.CreateBitmap()
+        hbmp.CreateCompatibleBitmap(hdc, 32, 32)
+        hdc = hdc.CreateCompatibleDC()
+        hdc.SelectObject(hbmp)
+        hdc.DrawIcon((0, 0), hIcon)
+        hdc.DeleteDC()
+        return hbmp.GetHandle()
