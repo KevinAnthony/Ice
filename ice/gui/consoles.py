@@ -87,7 +87,7 @@ class ConsoleGui(config.Config):
         if console is None:
             return
         icon = console.icon
-        self.emulator_label.setText(console.fullname)
+        self.console_label.setText(console.fullname)
         self.shortname.setText(console.shortname)
         self.extensions.setText(console.extensions)
         self.custom_roms_directory.setText(console.custom_roms_directory)
