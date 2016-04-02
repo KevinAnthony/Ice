@@ -5,14 +5,14 @@ Created by Scott on 2016-03-08.
 Copyright (c) 2016 Kevin Anthony. All rights reserved.
 """
 
-from copy import copy
+from PyQt5 import QtGui, QtWidgets, QtCore
 
 from ice.gui import config
 
-from PyQt5 import QtGui, QtWidgets, QtCore
+from copy import copy
+
 
 class ConsoleGui(config.Config):
-
     def __init__(self, parent=None, settings=None):
         super(ConsoleGui, self).__init__(parent)
 
@@ -27,6 +27,7 @@ class ConsoleGui(config.Config):
                 first_console = console
             action = self.create_console(console)
             self.toolbar.addAction(action)
+
         self.toolbar.adjustSize()
 
         #Set all Workspace widgets up here
@@ -69,6 +70,10 @@ class ConsoleGui(config.Config):
         self.refresh_size()
         self.on_edit_console(first_console)
 
+    def on_ok(self):
+        self.saveConsoleSettings()
+        self.close()
+
     def create_console(self, console):
         if console is None:
             return
@@ -76,6 +81,73 @@ class ConsoleGui(config.Config):
         if icon is None or icon.isNull():
             icon = QtGui.QIcon("../icon.ico")
         return self.create_action(icon, console.shortname, lambda: self.on_edit_console(console) )
+
+    def create_config_line(self, label_text, settings_widget):
+        widget = QtWidgets.QWidget()
+        self.workspace.addWidget(widget)
+
+        hbox = QtWidgets.QHBoxLayout(widget)
+
+        label = QtWidgets.QLabel(label_text)
+        label.setAlignment(QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        label.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        hbox.addWidget(label)
+
+        if not type(settings_widget) is QtWidgets.QComboBox:
+            settings_widget.setAlignment(QtCore.Qt.AlignTop)
+        settings_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        hbox.addWidget(settings_widget)
+
+    def saveConsoleSettings(self):
+        temp_file = "../consoles.txt"
+        f = open(temp_file, "w")
+
+        for console in self.consoles:
+
+            if console.fullname != self.console_label.text():
+                f.write("[" + console.fullname + "]\n")
+
+                for attribute in dir(console):
+
+                    if attribute == "emulator" and console.emulator is not None:
+                        f.write("emulator=" + console.emulator.name + "\n")
+                    elif not attribute.startswith('__') and not attribute.startswith('_') and attribute != "count" and attribute != "index" and attribute != "fullname":
+
+                        attribute_value = str(getattr(console,attribute))
+
+                        if attribute_value != "" :
+
+                            if attribute == "prefix":
+                                attribute_value = "[" + attribute_value + "]"
+
+                            file_attribute = attribute
+
+                            if attribute == "shortname":
+                                file_attribute = "nickname"
+                            elif attribute == "custom_roms_directory":
+                                file_attribute = "rom directory"
+                            elif attribute == "images_directory":
+                                file_attribute = "images directory"
+
+                            f.write(file_attribute + "=" + attribute_value + "\n")
+            else:
+                f.write("[" + self.console_label.text() + "]\n")
+                if self.shortname.text() != "":
+                    f.write("nickname=" + self.shortname.text() + "\n")
+                if str(self.emulator_combobox.currentText()) != "":
+                    f.write("emulator=" + str(self.emulator_combobox.currentText()) + "\n")
+                if self.extensions.text() != "":
+                    f.write("extensions=" + self.extensions.text() + "\n")
+                if self.custom_roms_directory.text() != "":
+                    f.write("roms directory=" + self.custom_roms_directory.text() + "\n")
+                if self.prefix.text() != "":
+                    f.write("prefix=" + self.prefix.text() + "\n")
+                if self.icon != "":
+                    f.write("icon=" + self.icon.text() + "\n")
+                if self.images_directory.text() != "":
+                    f.write("images directory=" + self.images_directory.text() + "\n")
+            f.write("\n")
+        f.close()
 
     def find_console(self, name):
         for c in self.consoles:
@@ -100,8 +172,3 @@ class ConsoleGui(config.Config):
         index = self.emulator_combobox.findText(console.emulator.name, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.emulator_combobox.setCurrentIndex(index)
-
-    def on_ok(self):
-        # TODO write to app_settings
-        # TODO write to consoles.txt
-        self.close()
