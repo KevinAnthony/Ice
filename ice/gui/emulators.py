@@ -43,3 +43,17 @@ class EmulatoreGui(config.Config):
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.workspace.addWidget(line)
+
+        self.on_edit_emulator(first_emulator)
+
+    def create_emulator(self, emulator):
+        if emulator is None:
+            return
+        icon = self.icon_from_exec(emulator.location)
+        if icon is None or icon.isNull():
+            icon = QtGui.QIcon("../icon.ico")
+        return self.create_action(icon, emulator.name, lambda: self.on_edit_emulator(emulator))
+
+    def on_edit_emulator(self, emulator):
+        self.emulator_label.setText(emulator.name)
+
