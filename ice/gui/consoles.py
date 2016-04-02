@@ -74,7 +74,7 @@ class ConsoleGui(config.Config):
             return
         icon = QtGui.QIcon(console.icon)
         if icon is None or icon.isNull():
-            icon = QtWidgets.QIcon("../icon.ico")
+            icon = QtGui.QIcon("../icon.ico")
         return self.create_action(icon, console.shortname, lambda: self.on_edit_console(console) )
 
     def find_console(self, name):
